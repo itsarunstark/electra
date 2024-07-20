@@ -36,7 +36,7 @@ void logFile(int level, const char *msg){
 void LOG_INIT(int priority){
     level = priority;
 #ifdef LOGFILE
-    printf("logfile enabled.\n");
+    printf("logfile enabled. with priority %d\n", level);
     logpointer = fopen(LOGFILE, "r");
     if(!logpointer) logpointer = fopen(LOGFILE, "w");
     else{
@@ -52,7 +52,6 @@ void LOG_INIT(int priority){
 
 
 void LOG(int priority, const char * message, enum loglevel level){
-
 #ifdef LOGENABLE
     if(priority >= level) printf("%s%s %s\n\e[0;0m",colors[level], msgtypes[level], message);
 #endif //LOGENABLE
