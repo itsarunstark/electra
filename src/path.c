@@ -1,5 +1,6 @@
 // #include "path.h"
-#include "path.h"
+#include "../include/path.h"
+#include "../include/log.h"
 #include<stdlib.h>
 #include<stdio.h>
 #include <string.h>
@@ -9,7 +10,8 @@ char **pathstring = NULL;
 
 int totalpaths = 0;
 path **paths = NULL;
-#include "log.h"
+
+
 #define PRINT(X) LOG(1, X, INFO)
 char *allocate_space(int size){
     if (!size) return NULL;
@@ -76,15 +78,16 @@ path *pathWithLength(const char *pathlike, int size){
 }
 
 path *getParent(path *ch){
-    if(ch->length < 2) return ch;
-    path *child = pathWithLength(ch->name, ch->length);
-    int length = child->length;
-    if(child->name[length-1] == '/') child->length--;
-    while(child->length > 1 && child->name[child->length-1] != '/'){
-        child->length--;
-    }
-    child->name[child->length] = '\0';
-    return child;
+    printf("here.\n");
+    int length = ch->length;
+    if(length < 2) return ch;
+    if(ch->name[length-1] == '/') length--;
+    char parent[length+1];
+    while(ch->name[length-1] != '/' && length) length--;
+    printf("parent size % d\n", length);
+    strncpy(parent, ch->name, length);
+    parent[length] = '\0';
+    return Path(parent);
 }
 
 void freeallpaths(){

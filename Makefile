@@ -1,13 +1,13 @@
 CC=gcc
-CFLAGS= -g -I./include
+CFLAGS= -g -I./include -I.
 LIB=./lib
 BIN=./bin
 SRC=./src
-LINKS=-lwayland-client
+LINKS=-lwayland-client -lwayland-egl -lEGL -lGL -lGLEW
 default: create electra
 	echo "build finished."
 
-electra: ${LIB}/main.o ${LIB}/path.o ${LIB}/log.o
+electra: ${LIB}/main.o ${LIB}/pointer.o ${LIB}/path.o ${LIB}/log.o ${LIB}/xdg-shell-client.o ${LIB}/xdg-client-output-z.o
 	${CC} ${CFLAGS} $^ -o $@ ${LINKS}
 
 ${LIB}/main.o: ${SRC}/main.c
@@ -16,8 +16,18 @@ ${LIB}/main.o: ${SRC}/main.c
 ${LIB}/path.o: ${SRC}/path.c
 	${CC} ${CFLAGS} -c -o $@ $^
 
+${LIB}/pointer.o: ${SRC}/pointer.c
+	${CC} ${CFLAGS} -c -o $@ $^
+
 ${LIB}/log.o: ${SRC}/log.c
 	${CC} ${CFLAGS} -c -o $@ $^
+
+${LIB}/xdg-shell-client.o: ${SRC}/xdg-shell-client.c
+	${CC} ${CFLAGS} -c -o $@ $^
+
+${LIB}/xdg-client-output-z.o: ${SRC}/xdg-client-output-z.c
+	${CC} ${CFLAGS} -c -o $@ $^
+
 create:
 	mkdir -p lib bin logs
 	echo "created paths"
@@ -28,5 +38,7 @@ clean:
 	rm -rf ./bin
 	rm -rf ./lib
 	rm -rf ./logs
-.PHONY: create clean
+.PHONY: create clean memcheck
 
+memcheck: electra
+	valgrind --leak-check=full --gen-suppressions=all --log-fd=9 ./electra  9>>memcheck.log

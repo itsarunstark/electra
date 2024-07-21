@@ -1,0 +1,8 @@
+#version 330 core
+// #ifdef GLES
+// precision mediump float;
+// #endif
+
+void main(){
+    gl_FragColor = vec4(0.0, 1.0 , 0.0, 1.0);
+}
