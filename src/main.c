@@ -1,4 +1,5 @@
 #include <EGL/eglplatform.h>
+#include <bits/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <wayland-client-core.h>
@@ -13,6 +14,7 @@
 #include "../include/xdg-shell-client.h"
 #include "../include/pointer.h"
 #include "../include/xdg-client-output-z.h"
+#include <linux/input-event-codes.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -33,9 +35,16 @@ struct Paths{
     path *wall2_path;
 } filepath;
 
+enum UNIFORMS{
+    U_TIME,
+    U_RESOLUTION,
+    U_MOUSE
+};
+
 struct __appdata{
     int width, height;
-    short closed;
+    short closed, render;
+    double currentTime, initalTime, renderDuration;
     struct wl_display* display;
     struct wl_surface* surface;
     struct wl_compositor* compositor;
@@ -44,6 +53,7 @@ struct __appdata{
     struct wl_egl_window* egl_window;
     struct wl_callback *render_callback;
     struct wl_output* output;
+    struct wl_callback *cb;
 } Runtime;
 
 struct __dev{
@@ -90,6 +100,17 @@ struct shader{
     GLuint VAO, VBO;
 } Shader;
 
+struct _uniforms{
+    GLint u_time;
+    GLint u_resolution;
+    GLint u_mouse;
+} Uniforms;
+
+struct pointer_data{
+    uint32_t events, button, button_state;
+    double surface_x, surface_y;
+} PointerData;
+
 float mesh[] = {
         -1.0, -1.0,
          1.0, -1.0,
@@ -99,6 +120,7 @@ float mesh[] = {
         -1.0, -1.0
 };
 
+struct timespec tp;
 //bind functions
 
 int initRuntime();
@@ -134,17 +156,27 @@ void zxdg_description(void *data, struct zxdg_output_v1* output, const char *des
 void zxdg_name(void *data, struct zxdg_output_v1* output, const char *name);
 void zxdg_logical_size(void *data, struct zxdg_output_v1 *output, int32_t width, int32_t height);
 void zxdg_logical_position(void *data, struct zxdg_output_v1* output, int32_t x, int32_t y);
+void pointer_motion_event_electra(void *, struct wl_pointer *,uint32_t,wl_fixed_t,wl_fixed_t);
+void pointer_button_event_electra(void *,struct wl_pointer *,uint32_t,uint32_t,uint32_t,uint32_t);
+void pointer_frame_event_electra(void *data, struct wl_pointer *wl_pointer);
 //init setup
 
 void initSetup(){
+    clock_gettime(CLOCK_MONOTONIC, &tp);
     memset(&Runtime, 0, sizeof(Runtime));
     memset(&EGLData, 0, sizeof(EGLData));
     memset(&XDGFrame, 0, sizeof(XDGFrame));
     memset(&Devices, 0, sizeof(Devices));
     memset(&Shader, 0, sizeof(Shader));
-    Runtime.width = 136;
-    Runtime.height = 76;
+    memset(&Uniforms, -1, sizeof(Uniforms));
+    memset(&PointerData, 0, sizeof(PointerData));
+    Runtime.width = 800;
+    Runtime.height = 400;
     Runtime.closed = 0;
+    Runtime.initalTime = tp.tv_sec + (1.0*tp.tv_nsec)/(1E+9);
+    Runtime.currentTime = 0.0;
+    Runtime.render = 0;
+    Runtime.renderDuration = 3.0;
 }
 
 
@@ -171,9 +203,8 @@ int main(int argc, char *argv[]){
     wl_display_roundtrip(Runtime.display);
     EXIT_FAIL(bindDevices(), "I/O device bind failed\n");
     while(!Runtime.closed){
-         wl_display_dispatch(Runtime.display);
+        wl_display_dispatch(Runtime.display);
     }
-
 
 finish:
     freeallpaths();
@@ -203,7 +234,6 @@ finish:
     FREE(Runtime.seat, wl_seat_destroy);
     FREE(Runtime.surface, wl_surface_destroy);
     FREE(Runtime.display, wl_display_disconnect);
-
     return 0;
 }
 
@@ -211,15 +241,22 @@ finish:
 
 
 void draw(){
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0.0, 0.0, 0.5, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-    printf("Shader program : %d\n", Shader.shader_program);
+    // printf("Shader program : %d\n", Shader.shader_program);
     glUseProgram(Shader.shader_program);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
     glBindVertexArray(Shader.VAO);
     glDrawArrays(GL_TRIANGLES, 0 , 6);
-    printf("trying to draw.\n");
+    // printf("trying to draw.\n");
     eglSwapInterval(EGLData.display,0 );
     eglSwapBuffers(EGLData.display,EGLData.surface);
+    if(Runtime.render){
+        printf("adding render request.\n");
+        Runtime.cb = wl_surface_frame(Runtime.surface);
+        wl_callback_add_listener(Runtime.cb, &Listeners.render_listener , NULL);
+    }
 }
 
 
@@ -371,9 +408,9 @@ int bindListeners(){
     Listeners.pointer_listener.axis_stop = pointer_axis_top_event;
     Listeners.pointer_listener.axis_value120 = pointer_axis120_event;
     Listeners.pointer_listener.leave = pointer_leave_event;
-    Listeners.pointer_listener.motion = pointer_motion_even;
-    Listeners.pointer_listener.button = pointer_button_event;
-    Listeners.pointer_listener.frame = pointer_frame_event;
+    Listeners.pointer_listener.motion = pointer_motion_event_electra;
+    Listeners.pointer_listener.button = pointer_button_event_electra;
+    Listeners.pointer_listener.frame = pointer_frame_event_electra;
     Listeners.output_listener.description = zxdg_description;
     Listeners.output_listener.name = zxdg_name;
     Listeners.output_listener.logical_position = zxdg_logical_position;
@@ -426,6 +463,10 @@ void configure_xdg_surface(void *data, struct xdg_surface* surface, uint32_t ser
     // printf("Ok now draw should be here.\n");
     wl_egl_window_resize(Runtime.egl_window, Runtime.width, Runtime.height, 0, 0);
     glViewport(0, 0, Runtime.width, Runtime.height);
+    glUseProgram(Shader.shader_program);
+    float width = Runtime.width;
+    float height = Runtime.height;
+    glUniform2f(Uniforms.u_resolution, width, height);
     draw();
 }
 
@@ -441,6 +482,8 @@ void xdg_configure_bounds(void *data, struct xdg_toplevel *toplevel, int32_t wid
 
 void xdg_toplevel_closed(void *data, struct xdg_toplevel *toplevel){
     Runtime.closed = 1;
+    Runtime.render = 0;
+    printf("closed true.\n");
 }
 
 void xdg_toplevel_configure(void *data,
@@ -456,8 +499,62 @@ void xdg_toplevel_configure(void *data,
 
 void render_frame(void *data, struct wl_callback *callback, uint32_t callbackdata){
     wl_callback_destroy(callback);
+    printf("render request.\n");
+    // printf("Draw calling.\n");
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    glUniform1f(Uniforms.u_time, Runtime.currentTime);
     draw();
-    // printf("game working.\n");
+    // Runtime.currentTime = tp.tv_sec + (1.0*tp.tv_nsec)/(1E+9);
+    Runtime.currentTime += 1./600;
+    // printf("%0.04lf\n", Runtime.currentTime);
+
+}
+
+void pointer_motion_event_electra(void *data,
+    struct wl_pointer *wl_pointer,
+    uint32_t time,
+    wl_fixed_t surface_x,
+    wl_fixed_t surface_y
+)
+{
+        PointerData.events |= POINTER_MOUSE_MOVE;
+        PointerData.surface_x = wl_fixed_to_double(surface_x);
+        PointerData.surface_y = wl_fixed_to_double(surface_y);
+}
+
+void pointer_button_event_electra(void *data,
+    struct wl_pointer *wl_pointer,
+    uint32_t serial,
+    uint32_t time,
+    uint32_t button,
+    uint32_t state
+)
+{
+    PointerData.events |= POINTER_BUTTON_CLICK;
+    PointerData.button = button;
+}
+
+void pointer_frame_event_electra(void *data,
+		      struct wl_pointer *wl_pointer)
+{
+    if(PointerData.events & POINTER_BUTTON_CLICK){
+        printf("button click detected.\n");
+        printf("LEFT %d\n", PointerData.button == BTN_LEFT);
+        printf("RIGHT %d\n", PointerData.button == BTN_RIGHT);
+        if(!Runtime.render){
+            Runtime.render = 1;
+            printf("ok\n");
+            draw();
+
+        }
+        // Runtime.currentTime = 0;
+        // draw();
+
+    }
+    if(PointerData.events & POINTER_MOUSE_MOVE){
+        // printf("mouse move working .\n");
+    }
+    PointerData.events = 0;
 }
 
 void seat_capabilities(void *data, struct wl_seat *wl_seat, uint32_t capabilities)
@@ -513,8 +610,6 @@ void uploadVBO(){
 }
 
 
-
-
 int setupShaders(){
     eglMakeCurrent(EGLData.display, EGLData.surface, EGLData.surface, EGLData.context );
     int status;
@@ -538,10 +633,19 @@ int setupShaders(){
     }
     message("Successfully linked all shaders.");
     LOG(0, "Detaching and deleteing shader objects", INFO);
-    // glDetachShader(Shader.shader_program, Shader.vertex_shader);
-    // glDetachShader(Shader.shader_program, Shader.fragment_shader);
-    // glDeleteShader(Shader.vertex_shader);
-    // glDeleteShader(Shader.fragment_shader);
+    glDetachShader(Shader.shader_program, Shader.vertex_shader);
+    glDetachShader(Shader.shader_program, Shader.fragment_shader);
+    glDeleteShader(Shader.vertex_shader);
+    glDeleteShader(Shader.fragment_shader);
+    Uniforms.u_mouse = glGetUniformLocation(Shader.shader_program, "u_mouse");
+    Uniforms.u_time = glGetUniformLocation(Shader.shader_program, "u_time");
+    Uniforms.u_resolution = glGetUniformLocation(Shader.shader_program, "u_resolution");
+    sprintf(logs, "POINTER u_resolution: %d", Uniforms.u_resolution);
+    LOG(4, logs, MESSAGE);
+    sprintf(logs, "POINTER u_time: %d" , Uniforms.u_time);
+    LOG(4, logs, MESSAGE);
+    sprintf(logs, "POINTER u_mouse: %d", Uniforms.u_mouse);
+    LOG(4, logs, MESSAGE);
     return 1;
 
 
@@ -555,38 +659,26 @@ shadererror:
     return 0;
 }
 
-
-
-
-
-
-
-
 GLint loadShader(path *mypath, GLenum shadertype){
     // // return 1;
     char k[250];
     int status = 1;
     GLint shader = 0;
-    char *buff;
-    size_t size;
-    struct stat filestat;
-    int fd = open(mypath->name, O_RDONLY, S_IRUSR | S_IROTH);
-    sprintf(k, "%s not found.", mypath->name);
-    if (fd < 1) {
-        LOG(10, k, FATAL);
-        goto error;
-    }
-    fstat(fd, &filestat);
-    size = filestat.st_size;
-    printf("file size %ld\n", size);
     shader = glCreateShader(shadertype);
-    if (shader <= 0) goto error;
+    FILE *fp = fopen(mypath->name, "r");
+    if(!fp) {
+        return 0;
 
-    buff = (char *)mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
-    const char *buffer = buff;
-    if(!buff) goto error;
-    printf("%s\n", buff);
-    glShaderSource(shader, 1, &buffer, NULL);
+    }
+    fseek(fp, 0, SEEK_END);
+    size_t size = ftell(fp);
+    rewind(fp);
+    char buffer[size+1];
+    buffer[size] = '\0';
+    fread(buffer, 1, size, fp);
+    const char *buff = buffer;
+    printf("%s\n", buffer);
+    glShaderSource(shader, 1, &buff, NULL);
     glCompileShader(shader);
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
     if(!status){
@@ -598,17 +690,14 @@ GLint loadShader(path *mypath, GLenum shadertype){
     }
     sprintf(k, "successfully compiled %s", mypath->name);
     LOG(8, k, MESSAGE);
-    munmap(buff, size);
-    close(fd);
-    return 1;
+    fclose(fp);
+    return shader;
 
 
 error:
-    if (fd>=0) {
-        if (buff) munmap(buff, size);
-        close(fd);
-    }
     if(shader) glDeleteShader(shader);
+    printf("here error.\n");
+    if(fp) fclose(fp);
     return 0;
 }
 

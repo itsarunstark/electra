@@ -3,31 +3,34 @@
 
 LOGGING STARTED.
 =================================================
-[21-07-24::23:41:12]:[MESSAGE]:logging started.
+[22-07-24::23:51:21]:[MESSAGE]:logging started.
 
-[21-07-24::23:41:12]:[MESSAGE]:././share/fragment1.glsl
-[21-07-24::23:41:12]:[MESSAGE]:././share/vertex1.glsl
-[21-07-24::23:41:12]:[MESSAGE]:compositor loaded successfully.
-[21-07-24::23:41:12]:[MESSAGE]:seat loaded successfully.
-[21-07-24::23:41:12]:[MESSAGE]:zxdg_output_manager_v1 loaded successfully.
-[21-07-24::23:41:12]:[MESSAGE]:wm_base loaded successfully.
-[21-07-24::23:41:12]:[MESSAGE]:wl_output loaded successfully.
-[21-07-24::23:41:12]:[MESSAGE]:EGL OPENGL API BIND FINISHED.
-[21-07-24::23:41:12]:[MESSAGE]:EGL Context created successfully.
-[21-07-24::23:41:12]:[MESSAGE]:successfully compiled ././share/vertex1.glsl
-[21-07-24::23:41:12]:[MESSAGE]:successfully compiled ././share/fragment1.glsl
-[21-07-24::23:41:12]:[MESSAGE]:Successfully linked all shaders.
-[21-07-24::23:41:12]:[INFO]:Detaching and deleteing shader objects
-[21-07-24::23:41:12]:[MESSAGE]:Pointer ID: 
-[21-07-24::23:41:12]:[MESSAGE]:Pointer binded successfully.
-[21-07-24::23:41:12]:[MESSAGE]:Keyboard binded successfully.
-[21-07-24::23:41:12]:[INFO]:binding all pother pointer listeners.
-[21-07-24::23:41:15]:[INFO]:./electra
-[21-07-24::23:41:15]:[INFO]:./
-[21-07-24::23:41:15]:[INFO]:./share/fragment1.glsl
-[21-07-24::23:41:15]:[INFO]:././share/fragment1.glsl
-[21-07-24::23:41:15]:[INFO]:./share/vertex1.glsl
-[21-07-24::23:41:15]:[INFO]:././share/vertex1.glsl
-[21-07-24::23:41:15]:[INFO]:Destroy EGL Surface.
-[21-07-24::23:41:15]:[INFO]:Destroy EGL Context
-[21-07-24::23:41:15]:[MESSAGE]:Log stopped..
+[22-07-24::23:51:21]:[MESSAGE]:././share/fragment1.glsl
+[22-07-24::23:51:21]:[MESSAGE]:././share/vertex1.glsl
+[22-07-24::23:51:21]:[MESSAGE]:compositor loaded successfully.
+[22-07-24::23:51:21]:[MESSAGE]:seat loaded successfully.
+[22-07-24::23:51:21]:[MESSAGE]:zxdg_output_manager_v1 loaded successfully.
+[22-07-24::23:51:21]:[MESSAGE]:wm_base loaded successfully.
+[22-07-24::23:51:21]:[MESSAGE]:wl_output loaded successfully.
+[22-07-24::23:51:21]:[MESSAGE]:EGL OPENGL API BIND FINISHED.
+[22-07-24::23:51:21]:[MESSAGE]:EGL Context created successfully.
+[22-07-24::23:51:21]:[MESSAGE]:successfully compiled ././share/vertex1.glsl
+[22-07-24::23:51:21]:[MESSAGE]:successfully compiled ././share/fragment1.glsl
+[22-07-24::23:51:21]:[MESSAGE]:Successfully linked all shaders.
+[22-07-24::23:51:21]:[INFO]:Detaching and deleteing shader objects
+[22-07-24::23:51:21]:[MESSAGE]:POINTER u_resolution: 1
+[22-07-24::23:51:21]:[MESSAGE]:POINTER u_time: 0
+[22-07-24::23:51:21]:[MESSAGE]:POINTER u_mouse: -1
+[22-07-24::23:51:21]:[MESSAGE]:Pointer ID: 
+[22-07-24::23:51:21]:[MESSAGE]:Pointer binded successfully.
+[22-07-24::23:51:21]:[MESSAGE]:Keyboard binded successfully.
+[22-07-24::23:51:21]:[INFO]:binding all pother pointer listeners.
+[22-07-24::23:51:29]:[INFO]:./electra
+[22-07-24::23:51:29]:[INFO]:./
+[22-07-24::23:51:29]:[INFO]:./share/fragment1.glsl
+[22-07-24::23:51:29]:[INFO]:././share/fragment1.glsl
+[22-07-24::23:51:29]:[INFO]:./share/vertex1.glsl
+[22-07-24::23:51:29]:[INFO]:././share/vertex1.glsl
+[22-07-24::23:51:29]:[INFO]:Destroy EGL Surface.
+[22-07-24::23:51:29]:[INFO]:Destroy EGL Context
+[22-07-24::23:51:29]:[MESSAGE]:Log stopped..

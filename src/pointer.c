@@ -2,6 +2,10 @@
 #include "../include/pointer.h"
 #include<stdio.h>
 
+enum Pointerevents{
+    INE_ONE
+};
+
 void pointer_enter_event(
     void *data,
     struct wl_pointer *pointer,
@@ -30,6 +34,7 @@ void pointer_motion_even(void *data,
     wl_fixed_t surface_y
 ){
     // printf("this is pointer motion event.\n");
+    printf("%0.04lf %0.4lf\n", wl_fixed_to_double(surface_x), wl_fixed_to_double(surface_y));
 }
 
 void pointer_button_event(void *data,

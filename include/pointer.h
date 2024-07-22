@@ -2,6 +2,12 @@
 #define _POINTER_H
 
 #include <wayland-util.h>
+
+enum PointerD{
+    POINTER_BUTTON_CLICK=1,
+    POINTER_MOUSE_MOVE=2,
+    POINTER_MOUSE_LEAVE=4
+};
 void pointer_enter_event(
     void *data,
     struct wl_pointer *wl_pointer,
