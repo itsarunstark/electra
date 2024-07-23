@@ -3,6 +3,11 @@
 
 #include <wayland-util.h>
 
+enum ButtonState{
+    BUTTON_STATE_UP=0,
+    BUTTON_STATE_DOWN=1
+};
+
 enum PointerD{
     POINTER_BUTTON_CLICK=1,
     POINTER_MOUSE_MOVE=2,

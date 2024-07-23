@@ -3,7 +3,7 @@ CFLAGS= -g -I./include -I.
 LIB=./lib
 BIN=./bin
 SRC=./src
-LINKS=-lwayland-client -lwayland-egl -lEGL -lGL -lGLEW
+LINKS=-lwayland-client -lwayland-egl -lEGL -lGL -lGLEW -lm
 default: create electra
 	echo "build finished."
 
@@ -23,6 +23,9 @@ ${LIB}/log.o: ${SRC}/log.c
 	${CC} ${CFLAGS} -c -o $@ $^
 
 ${LIB}/xdg-shell-client.o: ${SRC}/xdg-shell-client.c
+	${CC} ${CFLAGS} -c -o $@ $^
+
+${LIB}/layer-shell-client-v1.o: ${SRC}/layer-shell-client-v1.c
 	${CC} ${CFLAGS} -c -o $@ $^
 
 ${LIB}/xdg-client-output-z.o: ${SRC}/xdg-client-output-z.c

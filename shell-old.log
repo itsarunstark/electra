@@ -3,34 +3,45 @@
 
 LOGGING STARTED.
 =================================================
-[22-07-24::23:51:21]:[MESSAGE]:logging started.
+[23-07-24::13:39:52]:[MESSAGE]:logging started.
 
-[22-07-24::23:51:21]:[MESSAGE]:././share/fragment1.glsl
-[22-07-24::23:51:21]:[MESSAGE]:././share/vertex1.glsl
-[22-07-24::23:51:21]:[MESSAGE]:compositor loaded successfully.
-[22-07-24::23:51:21]:[MESSAGE]:seat loaded successfully.
-[22-07-24::23:51:21]:[MESSAGE]:zxdg_output_manager_v1 loaded successfully.
-[22-07-24::23:51:21]:[MESSAGE]:wm_base loaded successfully.
-[22-07-24::23:51:21]:[MESSAGE]:wl_output loaded successfully.
-[22-07-24::23:51:21]:[MESSAGE]:EGL OPENGL API BIND FINISHED.
-[22-07-24::23:51:21]:[MESSAGE]:EGL Context created successfully.
-[22-07-24::23:51:21]:[MESSAGE]:successfully compiled ././share/vertex1.glsl
-[22-07-24::23:51:21]:[MESSAGE]:successfully compiled ././share/fragment1.glsl
-[22-07-24::23:51:21]:[MESSAGE]:Successfully linked all shaders.
-[22-07-24::23:51:21]:[INFO]:Detaching and deleteing shader objects
-[22-07-24::23:51:21]:[MESSAGE]:POINTER u_resolution: 1
-[22-07-24::23:51:21]:[MESSAGE]:POINTER u_time: 0
-[22-07-24::23:51:21]:[MESSAGE]:POINTER u_mouse: -1
-[22-07-24::23:51:21]:[MESSAGE]:Pointer ID: 
-[22-07-24::23:51:21]:[MESSAGE]:Pointer binded successfully.
-[22-07-24::23:51:21]:[MESSAGE]:Keyboard binded successfully.
-[22-07-24::23:51:21]:[INFO]:binding all pother pointer listeners.
-[22-07-24::23:51:29]:[INFO]:./electra
-[22-07-24::23:51:29]:[INFO]:./
-[22-07-24::23:51:29]:[INFO]:./share/fragment1.glsl
-[22-07-24::23:51:29]:[INFO]:././share/fragment1.glsl
-[22-07-24::23:51:29]:[INFO]:./share/vertex1.glsl
-[22-07-24::23:51:29]:[INFO]:././share/vertex1.glsl
-[22-07-24::23:51:29]:[INFO]:Destroy EGL Surface.
-[22-07-24::23:51:29]:[INFO]:Destroy EGL Context
-[22-07-24::23:51:29]:[MESSAGE]:Log stopped..
+[23-07-24::13:39:52]:[MESSAGE]:././share/fragment1.glsl
+[23-07-24::13:39:52]:[MESSAGE]:././share/vertex1.glsl
+[23-07-24::13:39:52]:[MESSAGE]:compositor loaded successfully.
+[23-07-24::13:39:52]:[MESSAGE]:seat loaded successfully.
+[23-07-24::13:39:52]:[MESSAGE]:zxdg_output_manager_v1 loaded successfully.
+[23-07-24::13:39:52]:[MESSAGE]:wm_base loaded successfully.
+[23-07-24::13:39:52]:[MESSAGE]:wl_output loaded successfully.
+[23-07-24::13:39:52]:[MESSAGE]:EGL OPENGL API BIND FINISHED.
+[23-07-24::13:39:52]:[MESSAGE]:EGL Context created successfully.
+[23-07-24::13:39:52]:[MESSAGE]:successfully compiled ././share/vertex1.glsl
+[23-07-24::13:39:52]:[MESSAGE]:successfully compiled ././share/fragment1.glsl
+[23-07-24::13:39:52]:[MESSAGE]:Successfully linked all shaders.
+[23-07-24::13:39:52]:[INFO]:Detaching and deleteing shader objects
+[23-07-24::13:39:52]:[MESSAGE]:POINTER u_resolution: 1
+[23-07-24::13:39:52]:[MESSAGE]:POINTER u_time: 0
+[23-07-24::13:39:52]:[MESSAGE]:POINTER u_mouse: 2
+[23-07-24::13:39:52]:[MESSAGE]:POINTER u_tex_0: 3
+[23-07-24::13:39:52]:[MESSAGE]:POINTER u_tex_1: 4
+[23-07-24::13:39:52]:[MESSAGE]:POINTER u_texsize: -1
+[23-07-24::13:39:52]:[MESSAGE]:././share/breeze1.jpg WIDTH: 1920:: HEIGHT:1280
+[23-07-24::13:39:52]:[INFO]:TEXTURE ID: 1
+[23-07-24::13:39:52]:[MESSAGE]:././share/breeze2.jpg WIDTH: 1920:: HEIGHT:1080
+[23-07-24::13:39:52]:[INFO]:TEXTURE ID: 2
+[23-07-24::13:39:52]:[MESSAGE]:Pointer ID: 
+[23-07-24::13:39:52]:[MESSAGE]:Pointer binded successfully.
+[23-07-24::13:39:52]:[MESSAGE]:Keyboard binded successfully.
+[23-07-24::13:39:52]:[INFO]:binding all pother pointer listeners.
+[23-07-24::13:40:00]:[INFO]:./electra
+[23-07-24::13:40:00]:[INFO]:./
+[23-07-24::13:40:00]:[INFO]:./share/fragment1.glsl
+[23-07-24::13:40:00]:[INFO]:././share/fragment1.glsl
+[23-07-24::13:40:00]:[INFO]:./share/vertex1.glsl
+[23-07-24::13:40:00]:[INFO]:././share/vertex1.glsl
+[23-07-24::13:40:00]:[INFO]:./share/breeze1.jpg
+[23-07-24::13:40:00]:[INFO]:././share/breeze1.jpg
+[23-07-24::13:40:00]:[INFO]:./share/breeze2.jpg
+[23-07-24::13:40:00]:[INFO]:././share/breeze2.jpg
+[23-07-24::13:40:00]:[INFO]:Destroy EGL Surface.
+[23-07-24::13:40:00]:[INFO]:Destroy EGL Context
+[23-07-24::13:40:00]:[MESSAGE]:Log stopped..

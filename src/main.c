@@ -1,7 +1,10 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <EGL/eglplatform.h>
 #include <bits/time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 #include <wayland-client.h>
@@ -14,6 +17,7 @@
 #include "../include/xdg-shell-client.h"
 #include "../include/pointer.h"
 #include "../include/xdg-client-output-z.h"
+#include "../include/stb_image.h"
 #include <linux/input-event-codes.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -38,13 +42,15 @@ struct Paths{
 enum UNIFORMS{
     U_TIME,
     U_RESOLUTION,
-    U_MOUSE
+    U_MOUSE,
+    U_TEX_0,
+    U_TEX_1
 };
 
 struct __appdata{
     int width, height;
     short closed, render;
-    double currentTime, initalTime, renderDuration;
+    double currentTime, initalTime, renderDuration, bound, wallstate;
     struct wl_display* display;
     struct wl_surface* surface;
     struct wl_compositor* compositor;
@@ -98,12 +104,19 @@ struct shader{
     GLint vertex_shader;
     GLint fragment_shader;
     GLuint VAO, VBO;
+    GLuint tex1, tex2;
+    struct {
+        float w1, h1, w2, h2;
+    } texsize;
 } Shader;
 
 struct _uniforms{
     GLint u_time;
     GLint u_resolution;
     GLint u_mouse;
+    GLint u_tex_0;
+    GLint u_tex_1;
+    GLint u_texsize;
 } Uniforms;
 
 struct pointer_data{
@@ -137,6 +150,8 @@ GLint loadShader(path *mypath, GLenum shadertype);
 void draw();
 void uploadVBO();
 int setupShaders();
+GLuint loadTextures(path *pathlike, float *w, float *h);
+int setupTextures();
 
 //listener functions
 
@@ -175,12 +190,8 @@ void initSetup(){
     Runtime.closed = 0;
     Runtime.initalTime = tp.tv_sec + (1.0*tp.tv_nsec)/(1E+9);
     Runtime.currentTime = 0.0;
-    Runtime.render = 0;
     Runtime.renderDuration = 3.0;
 }
-
-
-
 
 int main(int argc, char *argv[]){
     LOG_INIT(0);
@@ -198,6 +209,7 @@ int main(int argc, char *argv[]){
     EXIT_FAIL(attachXDGSurface(),"Failed to attach XDG Surface.");
     EXIT_FAIL(bindSeat(), "Seat bind failed\n");
     EXIT_FAIL(bindXDGOutput(), "XDG output failed to bind.\n");
+    EXIT_FAIL(setupTextures(), "Failed to load textures.");
     uploadVBO();
     wl_surface_commit(Runtime.surface);
     wl_display_roundtrip(Runtime.display);
@@ -237,26 +249,24 @@ finish:
     return 0;
 }
 
-
-
-
 void draw(){
     glClearColor(0.0, 0.0, 0.5, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-    // printf("Shader program : %d\n", Shader.shader_program);
     glUseProgram(Shader.shader_program);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, Shader.tex1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, Shader.tex2 );
+
     glBindVertexArray(Shader.VAO);
     glDrawArrays(GL_TRIANGLES, 0 , 6);
-    // printf("trying to draw.\n");
     eglSwapInterval(EGLData.display,0 );
     eglSwapBuffers(EGLData.display,EGLData.surface);
-    if(Runtime.render){
-        printf("adding render request.\n");
-        Runtime.cb = wl_surface_frame(Runtime.surface);
-        wl_callback_add_listener(Runtime.cb, &Listeners.render_listener , NULL);
-    }
+    // printf("yes less.\n");
+    Runtime.cb = wl_surface_frame(Runtime.surface);
+    wl_callback_add_listener(Runtime.cb, &Listeners.render_listener , NULL);
 }
 
 
@@ -367,6 +377,8 @@ int loadPaths(const char *parent, struct Paths *mPath){
     mPath->parent_path = getParent(Path(parent));
     mPath->fragment_path = join(mPath->parent_path, Path("./share/fragment1.glsl"));
     mPath->vertex_path = join(mPath->parent_path, Path("./share/vertex1.glsl"));
+    mPath->wall1_path = join(mPath->parent_path, Path("./share/breeze1.jpg"));
+    mPath->wall2_path = join(mPath->parent_path, Path("./share/breeze2.jpg"));
     LOG(1, mPath->fragment_path->name, MESSAGE);
     LOG(1, mPath->vertex_path->name, MESSAGE);
     printf("loaded paths.\n");
@@ -447,7 +459,7 @@ void handle_global(void *data,
         Runtime.output = wl_registry_bind(registry, name , &wl_output_interface, version );
         message("wl_output loaded successfully.");
     }
-    // if(strcmp(interface, zxdg_output_manager_v1_interface.name))
+    printf("interface %s\n", interface);
 }
 
 void handle_global_remove(void *data, struct wl_registry* registry, uint32_t name){
@@ -460,14 +472,16 @@ void wm_ping_listen(void *data, struct xdg_wm_base *base, uint32_t serial){
 
 void configure_xdg_surface(void *data, struct xdg_surface* surface, uint32_t serial){
     xdg_surface_ack_configure(surface,serial);
-    // printf("Ok now draw should be here.\n");
-    wl_egl_window_resize(Runtime.egl_window, Runtime.width, Runtime.height, 0, 0);
+    wl_egl_window_resize(Runtime.egl_window, Runtime.width , Runtime.height , 0 , 0);
     glViewport(0, 0, Runtime.width, Runtime.height);
-    glUseProgram(Shader.shader_program);
-    float width = Runtime.width;
-    float height = Runtime.height;
-    glUniform2f(Uniforms.u_resolution, width, height);
-    draw();
+    glUniform2f(Uniforms.u_resolution, (float)Runtime.width, (float)Runtime.height);
+    // glUniform1f(Uniforms.u_time, Runtime.currentTime);
+    glUniform1i(Uniforms.u_tex_0, 0);
+    glUniform1i(Uniforms.u_tex_1, 1);
+    // // // printf("%0.04lf , %0.04lf, %0.04lf, %0.04lf\n", Shader.texsize.w1, Shader.texsize.h1, Shader.texsize.w2, Shader.texsize.h2);
+    // glUniform4fv(Uniforms.u_texsize, 1, &Shader.texsize.w1);
+    // glUniform4f(Uniforms.u_texsize, Shader.texsize.w1, Shader.texsize.h1, Shader.texsize.w1, Shader.texsize.h2);
+    if(!Runtime.render) draw();
 }
 
 void xdg_wm_capabilites(void *data,
@@ -492,21 +506,20 @@ void xdg_toplevel_configure(void *data,
                             int32_t height,
                             struct wl_array *states)
 {
-        // printf("WIDTH %d HEIGHT %d\n", width, height);
+
         if(width) Runtime.width = width;
         if(height) Runtime.height = height;
 }
 
 void render_frame(void *data, struct wl_callback *callback, uint32_t callbackdata){
-    wl_callback_destroy(callback);
-    printf("render request.\n");
-    // printf("Draw calling.\n");
     clock_gettime(CLOCK_MONOTONIC, &tp);
-    glUniform1f(Uniforms.u_time, Runtime.currentTime);
-    draw();
-    // Runtime.currentTime = tp.tv_sec + (1.0*tp.tv_nsec)/(1E+9);
-    Runtime.currentTime += 1./600;
-    // printf("%0.04lf\n", Runtime.currentTime);
+    wl_callback_destroy(callback);
+    double t= (tp.tv_sec + (1.0*tp.tv_nsec)/(1E+9));
+    Runtime.currentTime = t - Runtime.initalTime;
+    if(Runtime.render){
+        glUniform1f(Uniforms.u_time, Runtime.currentTime);
+        draw();
+    }
 
 }
 
@@ -532,29 +545,24 @@ void pointer_button_event_electra(void *data,
 {
     PointerData.events |= POINTER_BUTTON_CLICK;
     PointerData.button = button;
+    PointerData.button_state = state;
 }
 
 void pointer_frame_event_electra(void *data,
 		      struct wl_pointer *wl_pointer)
 {
-    if(PointerData.events & POINTER_BUTTON_CLICK){
-        printf("button click detected.\n");
-        printf("LEFT %d\n", PointerData.button == BTN_LEFT);
-        printf("RIGHT %d\n", PointerData.button == BTN_RIGHT);
-        if(!Runtime.render){
+    if(PointerData.events & POINTER_BUTTON_CLICK && PointerData.button_state == BUTTON_STATE_DOWN){
+        printf("yes\n");
+        if(!Runtime.render) {
             Runtime.render = 1;
-            printf("ok\n");
+            clock_gettime(CLOCK_MONOTONIC, &tp);
+            Runtime.initalTime = tp.tv_sec + (1.0*tp.tv_nsec)/(1E+9);
             draw();
-
         }
-        // Runtime.currentTime = 0;
-        // draw();
+        glUniform4f(Uniforms.u_mouse, PointerData.surface_x,Runtime.height-PointerData.surface_y, Runtime.currentTime, Runtime.wallstate);
+        Runtime.wallstate = !Runtime.wallstate;
 
     }
-    if(PointerData.events & POINTER_MOUSE_MOVE){
-        // printf("mouse move working .\n");
-    }
-    PointerData.events = 0;
 }
 
 void seat_capabilities(void *data, struct wl_seat *wl_seat, uint32_t capabilities)
@@ -596,7 +604,6 @@ void zxdg_description(void *data, struct zxdg_output_v1* output, const char *des
 
 void uploadVBO(){
     eglMakeCurrent(EGLData.display, EGLData.surface, EGLData.surface, EGLData.context );
-    // assert(eglMakeCurrent(EGLData.display,EGLData.surface , EGLData.surface , EGLData.context )==EGL_TRUE);
 
     glGenVertexArrays(1, &Shader.VAO);
     glBindVertexArray(Shader.VAO);
@@ -605,8 +612,6 @@ void uploadVBO(){
     glBufferData(GL_ARRAY_BUFFER, sizeof(mesh), mesh, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, (void *)0);
     glEnableVertexAttribArray(0);
-    // printf("Vertex Array Pointer %d\n", Shader.VAO);
-    // printf("Vertex Buffer Pointer %d\n", Shader.VBO);
 }
 
 
@@ -640,11 +645,20 @@ int setupShaders(){
     Uniforms.u_mouse = glGetUniformLocation(Shader.shader_program, "u_mouse");
     Uniforms.u_time = glGetUniformLocation(Shader.shader_program, "u_time");
     Uniforms.u_resolution = glGetUniformLocation(Shader.shader_program, "u_resolution");
+    Uniforms.u_tex_0 = glGetUniformLocation(Shader.shader_program, "u_tex_0");
+    Uniforms.u_tex_1 = glGetUniformLocation(Shader.shader_program, "u_tex_1");
+    Uniforms.u_texsize = glGetUniformLocation(Shader.shader_program, "u_texsize");
     sprintf(logs, "POINTER u_resolution: %d", Uniforms.u_resolution);
     LOG(4, logs, MESSAGE);
     sprintf(logs, "POINTER u_time: %d" , Uniforms.u_time);
     LOG(4, logs, MESSAGE);
     sprintf(logs, "POINTER u_mouse: %d", Uniforms.u_mouse);
+    LOG(4, logs, MESSAGE);
+    sprintf(logs, "POINTER u_tex_0: %d", Uniforms.u_tex_0);
+    LOG(4, logs, MESSAGE);
+    sprintf(logs, "POINTER u_tex_1: %d", Uniforms.u_tex_1);
+    LOG(4, logs, MESSAGE);
+    sprintf(logs, "POINTER u_texsize: %d", Uniforms.u_texsize);
     LOG(4, logs, MESSAGE);
     return 1;
 
@@ -702,6 +716,8 @@ error:
 }
 
 int freeShaders(){
+    if(Shader.tex1) glDeleteTextures(1, &Shader.tex1);
+    if(Shader.tex2) glDeleteTextures(1, &Shader.tex2);
     if(Shader.VBO) glDeleteBuffers(1, &Shader.VBO);
     if(Shader.VAO) glDeleteVertexArrays(1, &Shader.VAO);
     if (Shader.vertex_shader) glDeleteShader(Shader.vertex_shader);
@@ -711,4 +727,43 @@ int freeShaders(){
 }
 
 
+GLuint loadTextures(path *pathlike, float *w1, float *h1){
+    int width, height, channels;
+    GLuint texid;
+    char log[50];
+    sprintf(log, "Texture %s failed to load.", pathlike->name);
+    glGenTextures(1, &texid);
+    glBindTexture(GL_TEXTURE_2D, texid);
+    CHECK(texid, "Failed to generate texture.");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    stbi_set_flip_vertically_on_load(1);
+    unsigned char *buff = stbi_load(pathlike->name, &width, &height, &channels, 0);
+    if(!buff){
+        glDeleteTextures(1, &texid);
+        LOG(10, log, FATAL);
+        return 0;
+    }
+    sprintf(log, "%s WIDTH: %d:: HEIGHT:%d", pathlike->name, width, height);
+    LOG(5, log, MESSAGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, buff);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    sprintf(log, "TEXTURE ID: %d", texid);
+    LOG(8, log, INFO);
+    *w1 = (float)width;
+    *h1 = (float)height;
+    free(buff);
+    return texid;
+}
 
+int setupTextures(){
+    Shader.tex1 = loadTextures(filepath.wall1_path , &Shader.texsize.w1, &Shader.texsize.h1);
+    CHECK(Shader.tex1, "FAILED TO LOAD TEXTURE UNIT 1");
+    Shader.tex2 = loadTextures(filepath.wall2_path, &Shader.texsize.w2, &Shader.texsize.h2);
+    CHECK(Shader.tex2, "FAILED TO LOAD TEXTURE UNIT 2");
+    return 1;
+    return 0;
+}
