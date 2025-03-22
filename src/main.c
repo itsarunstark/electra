@@ -17,6 +17,7 @@
 #include "../include/xdg-shell-client.h"
 #include "../include/pointer.h"
 #include "../include/xdg-client-output-z.h"
+#include "../include/layer-shell-unstable-v1.h"
 #include "../include/stb_image.h"
 #include <linux/input-event-codes.h>
 #include <unistd.h>
@@ -60,6 +61,7 @@ struct __appdata{
     struct wl_callback *render_callback;
     struct wl_output* output;
     struct wl_callback *cb;
+    struct zwlr_layer_shell_v1* layer_shell;
 } Runtime;
 
 struct __dev{
@@ -459,6 +461,10 @@ void handle_global(void *data,
         Runtime.output = wl_registry_bind(registry, name , &wl_output_interface, version );
         message("wl_output loaded successfully.");
     }
+    if(strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0){
+        Runtime.layer_shell = wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, version);
+        message("zwlr_layer_shell_v1_interface binded.");
+    }
     printf("interface %s\n", interface);
 }
 
@@ -475,12 +481,8 @@ void configure_xdg_surface(void *data, struct xdg_surface* surface, uint32_t ser
     wl_egl_window_resize(Runtime.egl_window, Runtime.width , Runtime.height , 0 , 0);
     glViewport(0, 0, Runtime.width, Runtime.height);
     glUniform2f(Uniforms.u_resolution, (float)Runtime.width, (float)Runtime.height);
-    // glUniform1f(Uniforms.u_time, Runtime.currentTime);
     glUniform1i(Uniforms.u_tex_0, 0);
     glUniform1i(Uniforms.u_tex_1, 1);
-    // // // printf("%0.04lf , %0.04lf, %0.04lf, %0.04lf\n", Shader.texsize.w1, Shader.texsize.h1, Shader.texsize.w2, Shader.texsize.h2);
-    // glUniform4fv(Uniforms.u_texsize, 1, &Shader.texsize.w1);
-    // glUniform4f(Uniforms.u_texsize, Shader.texsize.w1, Shader.texsize.h1, Shader.texsize.w1, Shader.texsize.h2);
     if(!Runtime.render) draw();
 }
 

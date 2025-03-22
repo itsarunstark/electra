@@ -3,45 +3,45 @@
 
 LOGGING STARTED.
 =================================================
-[23-07-24::13:39:52]:[MESSAGE]:logging started.
+[05-01-25::22:50:33]:[MESSAGE]:logging started.
 
-[23-07-24::13:39:52]:[MESSAGE]:././share/fragment1.glsl
-[23-07-24::13:39:52]:[MESSAGE]:././share/vertex1.glsl
-[23-07-24::13:39:52]:[MESSAGE]:compositor loaded successfully.
-[23-07-24::13:39:52]:[MESSAGE]:seat loaded successfully.
-[23-07-24::13:39:52]:[MESSAGE]:zxdg_output_manager_v1 loaded successfully.
-[23-07-24::13:39:52]:[MESSAGE]:wm_base loaded successfully.
-[23-07-24::13:39:52]:[MESSAGE]:wl_output loaded successfully.
-[23-07-24::13:39:52]:[MESSAGE]:EGL OPENGL API BIND FINISHED.
-[23-07-24::13:39:52]:[MESSAGE]:EGL Context created successfully.
-[23-07-24::13:39:52]:[MESSAGE]:successfully compiled ././share/vertex1.glsl
-[23-07-24::13:39:52]:[MESSAGE]:successfully compiled ././share/fragment1.glsl
-[23-07-24::13:39:52]:[MESSAGE]:Successfully linked all shaders.
-[23-07-24::13:39:52]:[INFO]:Detaching and deleteing shader objects
-[23-07-24::13:39:52]:[MESSAGE]:POINTER u_resolution: 1
-[23-07-24::13:39:52]:[MESSAGE]:POINTER u_time: 0
-[23-07-24::13:39:52]:[MESSAGE]:POINTER u_mouse: 2
-[23-07-24::13:39:52]:[MESSAGE]:POINTER u_tex_0: 3
-[23-07-24::13:39:52]:[MESSAGE]:POINTER u_tex_1: 4
-[23-07-24::13:39:52]:[MESSAGE]:POINTER u_texsize: -1
-[23-07-24::13:39:52]:[MESSAGE]:././share/breeze1.jpg WIDTH: 1920:: HEIGHT:1280
-[23-07-24::13:39:52]:[INFO]:TEXTURE ID: 1
-[23-07-24::13:39:52]:[MESSAGE]:././share/breeze2.jpg WIDTH: 1920:: HEIGHT:1080
-[23-07-24::13:39:52]:[INFO]:TEXTURE ID: 2
-[23-07-24::13:39:52]:[MESSAGE]:Pointer ID: 
-[23-07-24::13:39:52]:[MESSAGE]:Pointer binded successfully.
-[23-07-24::13:39:52]:[MESSAGE]:Keyboard binded successfully.
-[23-07-24::13:39:52]:[INFO]:binding all pother pointer listeners.
-[23-07-24::13:40:00]:[INFO]:./electra
-[23-07-24::13:40:00]:[INFO]:./
-[23-07-24::13:40:00]:[INFO]:./share/fragment1.glsl
-[23-07-24::13:40:00]:[INFO]:././share/fragment1.glsl
-[23-07-24::13:40:00]:[INFO]:./share/vertex1.glsl
-[23-07-24::13:40:00]:[INFO]:././share/vertex1.glsl
-[23-07-24::13:40:00]:[INFO]:./share/breeze1.jpg
-[23-07-24::13:40:00]:[INFO]:././share/breeze1.jpg
-[23-07-24::13:40:00]:[INFO]:./share/breeze2.jpg
-[23-07-24::13:40:00]:[INFO]:././share/breeze2.jpg
-[23-07-24::13:40:00]:[INFO]:Destroy EGL Surface.
-[23-07-24::13:40:00]:[INFO]:Destroy EGL Context
-[23-07-24::13:40:00]:[MESSAGE]:Log stopped..
+[05-01-25::22:50:33]:[MESSAGE]:././share/fragment1.glsl
+[05-01-25::22:50:33]:[MESSAGE]:././share/vertex1.glsl
+[05-01-25::22:50:33]:[MESSAGE]:compositor loaded successfully.
+[05-01-25::22:50:33]:[MESSAGE]:seat loaded successfully.
+[05-01-25::22:50:33]:[MESSAGE]:zxdg_output_manager_v1 loaded successfully.
+[05-01-25::22:50:33]:[MESSAGE]:wm_base loaded successfully.
+[05-01-25::22:50:33]:[MESSAGE]:wl_output loaded successfully.
+[05-01-25::22:50:33]:[MESSAGE]:EGL OPENGL API BIND FINISHED.
+[05-01-25::22:50:33]:[MESSAGE]:EGL Context created successfully.
+[05-01-25::22:50:33]:[MESSAGE]:successfully compiled ././share/vertex1.glsl
+[05-01-25::22:50:33]:[MESSAGE]:successfully compiled ././share/fragment1.glsl
+[05-01-25::22:50:33]:[MESSAGE]:Successfully linked all shaders.
+[05-01-25::22:50:33]:[INFO]:Detaching and deleteing shader objects
+[05-01-25::22:50:33]:[MESSAGE]:POINTER u_resolution: 1
+[05-01-25::22:50:33]:[MESSAGE]:POINTER u_time: 0
+[05-01-25::22:50:33]:[MESSAGE]:POINTER u_mouse: 2
+[05-01-25::22:50:33]:[MESSAGE]:POINTER u_tex_0: 3
+[05-01-25::22:50:33]:[MESSAGE]:POINTER u_tex_1: 4
+[05-01-25::22:50:33]:[MESSAGE]:POINTER u_texsize: -1
+[05-01-25::22:50:33]:[MESSAGE]:././share/breeze1.jpg WIDTH: 1920:: HEIGHT:1280
+[05-01-25::22:50:33]:[INFO]:TEXTURE ID: 1
+[05-01-25::22:50:33]:[MESSAGE]:././share/breeze2.jpg WIDTH: 1920:: HEIGHT:1080
+[05-01-25::22:50:33]:[INFO]:TEXTURE ID: 2
+[05-01-25::22:50:33]:[MESSAGE]:Pointer ID: 
+[05-01-25::22:50:33]:[MESSAGE]:Pointer binded successfully.
+[05-01-25::22:50:33]:[MESSAGE]:Keyboard binded successfully.
+[05-01-25::22:50:33]:[INFO]:binding all pother pointer listeners.
+[05-01-25::22:50:45]:[INFO]:./electra
+[05-01-25::22:50:45]:[INFO]:./
+[05-01-25::22:50:45]:[INFO]:./share/fragment1.glsl
+[05-01-25::22:50:45]:[INFO]:././share/fragment1.glsl
+[05-01-25::22:50:45]:[INFO]:./share/vertex1.glsl
+[05-01-25::22:50:45]:[INFO]:././share/vertex1.glsl
+[05-01-25::22:50:45]:[INFO]:./share/breeze1.jpg
+[05-01-25::22:50:45]:[INFO]:././share/breeze1.jpg
+[05-01-25::22:50:45]:[INFO]:./share/breeze2.jpg
+[05-01-25::22:50:45]:[INFO]:././share/breeze2.jpg
+[05-01-25::22:50:45]:[INFO]:Destroy EGL Surface.
+[05-01-25::22:50:45]:[INFO]:Destroy EGL Context
+[05-01-25::22:50:45]:[MESSAGE]:Log stopped..
